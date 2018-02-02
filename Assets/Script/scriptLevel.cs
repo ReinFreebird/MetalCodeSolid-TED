@@ -4,10 +4,13 @@ using UnityEngine;
 
 public class scriptLevel : MonoBehaviour {
 	public SceneManagerClassv2 sceneMan;
-	private AudioSource audioX;
+	public SoundManager soundMan;
+	//private AudioSource audioX;
 	// Use this for initialization
 	void Start () {
-		audioX = gameObject.GetComponent<AudioSource> ();
+		//GameObject[] temp = this.GetComponentsInChildren<GameObject> ();
+
+		//audioX = gameObject.GetComponent<AudioSource> ();
 	}
 	
 	// Update is called once per frame
@@ -15,11 +18,11 @@ public class scriptLevel : MonoBehaviour {
 		
 	}
 	public void backButton(){
-		audioX.Play ();
+		soundMan.playSFX (0);
 		sceneMan.changeSceneNoLoading (0);
 	}
 	public void levelSelect(){
-		audioX.Play ();
+		soundMan.playSFX (1);
 		sceneMan.changeSceneNoLoading (2);
 	}
 }

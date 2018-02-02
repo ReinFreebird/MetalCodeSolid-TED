@@ -14,16 +14,18 @@ public class scriptCutScene : MonoBehaviour {
 	public string[] charaArray;
 	public Sprite[] sprites;
 	public SceneManagerClassv2 sceneMan;
-	public GameObject sfx;
-	private AudioSource audioX;
+	public SoundManager soundMan;
+	//private AudioSource audioX;
 	// Use this for initialization
 	private int currentLine;
 	private bool lineIsMoving,dialougeEnd;
+	private float textSpeed;
 	void Start () {
-		audioX = sfx.GetComponent<AudioSource> ();
 		currentLine = 0;
 		nextMessage ();
 		dialougeEnd = false;
+		soundMan.playBGM (0);
+		textSpeed = PlayerPrefs.GetFloat ("Speed", 1f);
 	}
 	public void nextMessage(){
 
@@ -56,8 +58,8 @@ public class scriptCutScene : MonoBehaviour {
 	private IEnumerator lineMove(char[]charDial) {
 		
 		for (int i = 0; i < charDial.Length; i++) {
-			yield return new WaitForSeconds(0.05f);
-			audioX.Play ();
+			yield return new WaitForSeconds(0.05f/textSpeed);
+			soundMan.playSFX (3);
 			dialouge.text += charDial [i];
 		}
 		lineIsMoving = false;

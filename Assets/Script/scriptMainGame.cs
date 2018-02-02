@@ -12,15 +12,11 @@ public class scriptMainGame : MonoBehaviour {
 	public Sprite cover;
 	public Sprite bookInside;
 	public SceneManagerClassv2 sceneMan;
+	public SoundManager soundMan;
 	public GameObject[] ciperPage;
 	public GameObject endMenu;
 	public Text lastScore;
 	public InputField nameInput;
-	//public Sprite[] scoreRadioSprites;
-	//public Sprite[] codeRadioSprites;
-	public AudioClip[] soundClip;
-	public GameObject sfxSource;
-	private AudioSource[] audioSource;//0 bgm, 1 sfx
 	private List<string> codeList;//List soal
 	private string currentCode;//Soal saat ini
 	private int round=0;
@@ -40,16 +36,13 @@ public class scriptMainGame : MonoBehaviour {
 		userArray = PlayerPrefsX.GetStringArray ("userArray", "Anonim", 15);
 		scoreArray = PlayerPrefsX.GetIntArray ("scoreArray",0,15);
 		//codeRadio.GetComponent<Animator> ().SetBool ("newCode", false);
-		audioSource=new AudioSource[2];
-		audioSource [0] = GetComponent<AudioSource> ();
-		audioSource [1] = sfxSource.GetComponent<AudioSource> ();
 		codeList=new List<string>();
 		generateCode ();
 		StartCoroutine(instantiateCode (0));
 		timeLeft = roundTime;
-		gameIsRunning = true;
 		turnPage (-99);
 		gameIsRunning = true;
+		soundMan.playBGM (1);
 	}
 	
 	// Update is called once per frame
@@ -63,11 +56,9 @@ public class scriptMainGame : MonoBehaviour {
 			
 				string temp = answerField.text;
 				string temp2 = temp.Substring (0, temp.Length - 1);
-				Debug.Log (temp2);
 				answerField.text = temp2;
 			} else if (Input.anyKeyDown) {
-				playSFX (2);
-				Debug.Log (Input.inputString);
+				soundMan.playSFX (2);
 				string temp = Input.inputString.ToUpper ();
 				answerField.text += temp;
 			}
@@ -77,6 +68,7 @@ public class scriptMainGame : MonoBehaviour {
 				timeLeft -= Time.deltaTime;
 				time.text = ((int)timeLeft).ToString ();
 			} else {
+				gameIsRunning = false;
 				StartCoroutine(gameOver ());
 			}
 			if (timeLeft < 30) {
@@ -91,7 +83,7 @@ public class scriptMainGame : MonoBehaviour {
 		}
 	}
 	public void turnPage(int turn){
-		playSFX (0);
+		soundMan.playSFX (6);
 		resetBookSprite ();
 		bookPage += turn;
 		Debug.Log (bookPage);
@@ -125,7 +117,6 @@ public class scriptMainGame : MonoBehaviour {
 		while (temp.Count > 0) {
 			random = Random.Range(0,temp.Count);
 			codeList.Add (temp [random]);
-			Debug.Log (codeList [codeList.Count - 1]);
 			temp.RemoveAt (random);
 
 		}
@@ -226,11 +217,12 @@ public class scriptMainGame : MonoBehaviour {
 		Debug.Log (answerField.text==currentCode);
 
 		if (answerField.text == currentCode) {
-			playSFX (3);
+			soundMan.playSFX (4);
 			addScore (100);
 			addTime (5f);
 			StartCoroutine(instantiateCode (round));
 		} else {
+			gameIsRunning = false;
 			StartCoroutine(gameOver ());
 		}
 		return answerField.text==currentCode;
@@ -253,10 +245,6 @@ public class scriptMainGame : MonoBehaviour {
 		//Debug.Log (round.ToString ());
 
 	}
-	private void playSFX(int index){
-		audioSource [1].clip = soundClip [index];
-		audioSource [1].Play();
-	}
 	private void addScore(int addPoint){
 		currentScore += addPoint;
 		score.text = currentScore.ToString();
@@ -265,13 +253,14 @@ public class scriptMainGame : MonoBehaviour {
 		timeLeft += addTime;
 	}
 	private IEnumerator gameOver(){
-		audioSource [0].Stop ();
-		timeLeft = 0;
 		gameIsRunning = false;
+		soundMan.gameOver ();
+		yield return new WaitForSeconds (1.5f);
+		timeLeft = 0;
 		yield return new WaitForSeconds (0.5f);
 		sceneMan.fadeToBlack ();
 		yield return new WaitForSeconds (0.5f);
-		playSFX (4);
+		soundMan.playSFX (5);
 		yield return new WaitForSeconds (3.0f);
 		endMenu.SetActive (true);
 		lastScore.text = currentScore.ToString ();
@@ -303,7 +292,7 @@ public class scriptMainGame : MonoBehaviour {
 	}
 	public void endGame(bool b){
 		addSort ();
-		playSFX (5);
+		soundMan.playSFX (1);
 		if (b) {//if true, restart
 			sceneMan.changeSceneNoLoading(3);
 		} else {//if false, back to main menu

@@ -17,27 +17,38 @@ public class scriptMenuMain : MonoBehaviour {
 
 
 	public SceneManagerClassv2 sceneman;
-
+	public SoundManager soundman;
 	//Objects for highscore
 	public GameObject highScore;
 	public Text[] highUserText;
 	public Text[] highScoresText;
 	public int[] highScores;
 	public string[] highUser;
-	private AudioSource audioX;
+	//private AudioSource audioX;
 	//public Text[] SortUser;
 	// Use this for initialization
 	void Awake(){
 		Screen.SetResolution (1028, 769, true);
 	}
 	void Start () {
-		audioX = gameObject.GetComponent<AudioSource> ();
 		highUser = PlayerPrefsX.GetStringArray ("userArray", "Anonim", 15);
 		highScores = PlayerPrefsX.GetIntArray ("scoreArray",0,15);
 		insertScore ();
+		setupSetting ();
 	}
 	private void setupSetting(){
-		
+		if (PlayerPrefs.GetInt ("SFX",1) == 0) {
+			sfxToggle.isOn = false;
+		} else {
+			sfxToggle.isOn = true;
+		}
+		if (PlayerPrefs.GetInt ("BGM",1) == 0) {
+			bgmToggle.isOn = false;
+		} else {
+			bgmToggle.isOn = true;
+		}
+
+		textSpeedSlider.GetComponent<Slider> ().value = PlayerPrefs.GetFloat ("Speed", 1f);
 	}
 
 	// Update is called once per frame
@@ -46,21 +57,21 @@ public class scriptMenuMain : MonoBehaviour {
 		//	gameObject.
 	}
 	public void clickStart(){
-		audioX.Play ();
+		soundman.playSFX (0);
 		sceneman.changeSceneNoLoading (1);
 	}
 	public void clickHighScore(){
-		audioX.Play ();
+		soundman.playSFX (0);
 		highScore.SetActive (true);
 		mainButton.SetActive (false);
 	}
 	public void clickCredit(){
-		audioX.Play ();
+		soundman.playSFX (0);
 		mainCredit.SetActive (true);
 		mainButton.SetActive (false);
 	}
 	public void clickSetting(){
-		audioX.Play ();
+		soundman.playSFX (0);
 		mainSetting.SetActive (true);
 		mainButton.SetActive (false);
 	}
@@ -71,19 +82,18 @@ public class scriptMenuMain : MonoBehaviour {
 		} else {
 			PlayerPrefs.SetInt ("BGM", 1);
 		}
+		soundman.setupPrefs ();
 	}
 	public void changeSFX(bool sfx){
 		bool temp = sfxToggle.isOn;
 		if (!temp) {
 			PlayerPrefs.SetInt ("SFX", 0);
-			audioX.mute = true;
 		} else {
 			PlayerPrefs.SetInt ("SFX", 1);
-			audioX.mute = false;
 
 		}
-		audioX.Play ();
-
+		soundman.setupPrefs ();
+		soundman.playSFX (0);
 	}
 	public void fullScreen(bool full){
 		bool temp = fullscreen.isOn;
@@ -100,24 +110,24 @@ public class scriptMenuMain : MonoBehaviour {
 
 
 	public void backHighScore(){
-		audioX.Play ();
+		soundman.playSFX (0);
 		highScore.SetActive (false);
 		mainButton.SetActive (true);
 	}
 
 	public void backCredit(){
-		audioX.Play ();
+		soundman.playSFX (0);
 		mainCredit.SetActive (false);
 		mainButton.SetActive (true);
 	}
 	public void backSetting(){
-		audioX.Play ();
+		soundman.playSFX (0);
 		mainSetting.SetActive (false);
 		mainButton.SetActive (true);
 	}
 	public void clickOut(){
-		audioX.Play ();
 		//Debug.Log (123);
+		soundman.playSFX (0);
 		Application.Quit ();
 	}
 
