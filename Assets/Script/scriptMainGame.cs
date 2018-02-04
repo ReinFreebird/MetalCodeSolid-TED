@@ -8,6 +8,9 @@ public class scriptMainGame : MonoBehaviour {
 	public Text answerField;
 	public Text time;
 	public Text score;
+	public Text mistakesText;
+	public Text multiplierText;
+	public Text scoreThisRound;
 	public Image bookSprite;
 	public Sprite cover;
 	public Sprite bookInside;
@@ -24,6 +27,9 @@ public class scriptMainGame : MonoBehaviour {
 
 	public string[] codeArray;
 	public int roundTime;
+	public int maxMistakes;
+	private int mistakeLeft;
+	private float multiplier;
 	private int currentScore;
 	private float timeLeft;
 	private int bookPage;
@@ -38,6 +44,8 @@ public class scriptMainGame : MonoBehaviour {
 		//codeRadio.GetComponent<Animator> ().SetBool ("newCode", false);
 		codeList=new List<string>();
 		generateCode ();
+		mistakeLeft = maxMistakes;
+		multiplier = 1.0f;
 		StartCoroutine(instantiateCode (0));
 		timeLeft = roundTime;
 		turnPage (-99);
@@ -214,20 +222,53 @@ public class scriptMainGame : MonoBehaviour {
 		
 	}
 	private bool checkAnswer(){
-		Debug.Log (answerField.text==currentCode);
 
 		if (answerField.text == currentCode) {
 			soundMan.playSFX (4);
-			addScore (100);
+			float tempScore=calculateScore(currentCode)*multiplier;
+			addScore ((int)tempScore);
+			updateMultiplier (true);
 			addTime (5f);
 			StartCoroutine(instantiateCode (round));
 		} else {
+			updateMultiplier (false);
+			if(mistakeLeft>0){
+				float x = calculateScore (currentCode) * multiplier;
+				int temp = (int)x;
+				scoreThisRound.text = "+"+temp.ToString();
+				mistakeLeft -= 1;
+				mistakesText.text = mistakeLeft.ToString ();
+				soundMan.playSFX (7);
+			}else{
 			gameIsRunning = false;
 			StartCoroutine(gameOver ());
+			}
 		}
 		return answerField.text==currentCode;
 	}
+	private int calculateScore (string answer){
+		int temp=0;
+		char[] code = answer.ToCharArray();
+		for (int i = 0; i < code.Length; i++) {
+			if (code [i] == ' ') {
+			
+			} else {
+				temp += 10;
+			}
+		}
+		return temp;
+	}
+	private void updateMultiplier(bool multi){
+		if (multi) {
+			multiplier += 0.1f;
+		} else {
+			multiplier = 1.0f;
+		}
+		multiplierText.text = multiplier.ToString () + "X";
+	
+	}
 	private IEnumerator instantiateCode(int round){
+		mistakesText.text = mistakeLeft.ToString ();
 		int nextRound = round;
 		if (nextRound >= 20) {
 			this.round = 0;
@@ -241,6 +282,9 @@ public class scriptMainGame : MonoBehaviour {
 		answerField.text = "";
 		code.text = cyper (codeList [nextRound]);
 		currentCode = codeList [nextRound];
+		float x = calculateScore (currentCode) * multiplier;
+		int temp = (int)x;
+		scoreThisRound.text = "+"+temp.ToString();
 		this.round++;
 		//Debug.Log (round.ToString ());
 

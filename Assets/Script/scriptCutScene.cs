@@ -22,10 +22,10 @@ public class scriptCutScene : MonoBehaviour {
 	private float textSpeed;
 	void Start () {
 		currentLine = 0;
-		nextMessage ();
 		dialougeEnd = false;
 		soundMan.playBGM (0);
 		textSpeed = PlayerPrefs.GetFloat ("Speed", 1f);
+		nextMessage ();
 	}
 	public void nextMessage(){
 
